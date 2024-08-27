@@ -88,7 +88,7 @@ function dbRestore( )
     }
     
     echo "Restoring $MYSQL_DATABASE.sql"
-    mysql -uroot -p$COMICRACK_ROOT_PASSWORD $MYSQL_DATABASE < /tmp/$MYSQL_DATABASE.sql || {
+    mysql -uroot -p$MYSQL_ROOT_PASSWORD $MYSQL_DATABASE < /tmp/$MYSQL_DATABASE.sql || {
         ERROR="Error restoring database:\n$(cat /tmp/$MYSQL_DATABASE.sql)"
         return 1
     }
@@ -108,7 +108,7 @@ function dbBackup( )
 {
     local ERROR=$ERROR
 
-    mysqldump -uroot -p$COMICRACK_ROOT_PASSWORD $MYSQL_DATABASE --add-drop-table --quote-names --add-drop-database > $sql_file || {
+    mysqldump -uroot -p$MYSQL_ROOT_PASSWORD $MYSQL_DATABASE --add-drop-table --quote-names --add-drop-database > $sql_file || {
         ERROR="Error creating database dump:\n$(cat $sql_file)"
         return 1
     }
