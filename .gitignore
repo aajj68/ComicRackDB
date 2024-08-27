@@ -1,0 +1,7 @@
+.sonarlint/
+.vscode/
+data/
+log/*
+!log/.gitignore
+var.env
+*.code-workspace
