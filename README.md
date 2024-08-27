@@ -115,6 +115,10 @@ To do this, simply run the command:
 C:\Users\<username>\projects\Docker\ComicRackDB>run.bat
 ```
 
+## PhpMyAdmin
+
+To access PhpMyAdmin, simply go to: [http://localhost:8080/index.php], replacing 'localhost' with the IP of the machine where the container is installed.
+
 ## Authors
 
 - [@aajj68](https://github.com/aajj68)
