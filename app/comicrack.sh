@@ -15,7 +15,8 @@
 #!/bin/bash
 
 # Import email and Telegram sending functions
-source /app/send_email.sh
+source /app/var.sh
+source /app/send_email.s
 source /app/telegram.sh
 
 AUTHOR="Antonio Jozzolino"
@@ -108,6 +109,8 @@ function dbBackup( )
 {
     local ERROR=$ERROR
 
+     echo "Backup database $MYSQL_DATABASE"
+    echo "mysqldump -uroot -p$MYSQL_ROOT_PASSWORD $MYSQL_DATABASE --add-drop-table --quote-names --add-drop-database"
     mysqldump -uroot -p$MYSQL_ROOT_PASSWORD $MYSQL_DATABASE --add-drop-table --quote-names --add-drop-database > $sql_file || {
         ERROR="Error creating database dump:\n$(cat $sql_file)"
         return 1
