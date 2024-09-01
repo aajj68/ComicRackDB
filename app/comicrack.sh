@@ -2,7 +2,7 @@
 
 # Import email and Telegram sending functions
 source /app/var.sh
-source /app/send_email.s
+source /app/send_email.sh
 source /app/telegram.sh
 
 AUTHOR="Antonio J"
@@ -16,6 +16,7 @@ else
     WHEN="$2"
 fi
 
+MYSQL_ROOT_PASSWORD=$COMICRACK_ROOT_PASSWORD
 host_name="%"
 db_server=$host_name
 backup_dir="/windows/backup/$WHEN"
@@ -95,7 +96,7 @@ function dbBackup( )
 {
     local ERROR=$ERROR
 
-     echo "Backup database $MYSQL_DATABASE"
+    echo "Backup database $MYSQL_DATABASE"
     echo "mysqldump -uroot -p$MYSQL_ROOT_PASSWORD $MYSQL_DATABASE --add-drop-table --quote-names --add-drop-database"
     mysqldump -uroot -p$MYSQL_ROOT_PASSWORD $MYSQL_DATABASE --add-drop-table --quote-names --add-drop-database > $sql_file || {
         ERROR="Error creating database dump:\n$(cat $sql_file)"
