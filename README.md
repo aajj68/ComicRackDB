@@ -50,26 +50,34 @@ Create a bot in telegram, get TELEGRAM_API_KEY and TELEGRAM_CHAT_ID and test sen
 - To get chat_id [`https://api.telegram.org/bot<token>/getMe`]
 - To send a message [`https://api.telegram.org/bot<token>/sendmessage?chat_id=<chat_id>&text=<message>`]
 
+## SSHD
+Create a windows firewall rule:
+netsh advfirewall firewall add rule name="SSH 2222" dir=in action=allow protocol=TCP localport=2222
+
 ## Project Tree
 ```
 ComicRackDB
-├─ app
-│  ├─ comicrack.sh
-│  ├─ crontab-cron
-│  ├─ docker-entrypoint.sh
-│  ├─ send_email.sh
-│  ├─ ssmtp.conf
-│  ├─ start_containers.bat
-│  ├─ telegram.sh
-│  ├─ var.env
-│  └─ var.env.example
-├─ data
-├─ log
-├─ docker-compose.yml
-├─ LICENSE
-├─ README.md
-├─ run.bat
-└─ run.sh
+├── app
+│   ├── ssh_keys
+│   │   ├── id_dsa.pub
+│   │   └── id_rsa.pub
+│   ├── add_ssh_keys.sh
+│   ├── comicrack.sh
+│   ├── crontab-cron
+│   ├── docker-entrypoint.sh
+│   ├── send_email.sh
+│   ├── ssmtp.conf
+│   ├── start_containers.bat
+│   ├── telegram.sh
+│   ├── var.env
+│   └── var.env.example
+├── data
+├── log
+├── docker-compose.yml
+├── LICENSE
+├── README.md
+├── run.bat
+└── run.sh
 
 ```
 
