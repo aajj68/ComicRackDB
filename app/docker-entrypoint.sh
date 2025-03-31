@@ -28,31 +28,14 @@ touch /root/.ssh/authorized_keys
 chmod 700 /root/.ssh
 chmod 600 /root/.ssh/authorized_keys
 
-# Script to append public keys to authorized_keys
-cat << 'EOF' > /app/add_ssh_keys.sh
-#!/bin/bash
-# Script to append public keys to authorized_keys
-KEYS_DIR="/app/ssh_keys"  # Diretório onde as chaves públicas serão armazenadas
-if [ -d "$KEYS_DIR" ]; then
-  for key in "$KEYS_DIR"/*.pub; do
-    if [ -f "$key" ]; then
-      cat "$key" >> /root/.ssh/authorized_keys
-      echo "Added SSH key from $key"
-    fi
-  done
-  # Remove duplicatas
-  sort -u /root/.ssh/authorized_keys -o /root/.ssh/authorized_keys
-fi
-EOF
-
-chmod +x /app/add_ssh_keys.sh
-/app/add_ssh_keys.sh  # Executa o script na inicialização
-
 # Configure SSH to use port 2222
 sed -i 's/#Port 22/Port 2222/' /etc/ssh/sshd_config
 echo "PermitRootLogin yes" >> /etc/ssh/sshd_config  # Permite login como root (ajuste conforme necessário)
 
 # Start services
+/app/add_ssh_keys.sh
+#/app/var.sh
+
 service cron start
 service ssh start  # Inicia o servidor SSH
 

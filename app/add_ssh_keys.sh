@@ -1,5 +1,6 @@
 #!/bin/bash
 # Script to append public keys to authorized_keys
+mkdir -p /root/.ssh/
 KEYS_DIR="/app/ssh_keys"  # Diretório onde as chaves públicas serão armazenadas
 if [ -d "$KEYS_DIR" ]; then
   for key in "$KEYS_DIR"/*.pub; do
