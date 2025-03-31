@@ -1,25 +1,12 @@
 #!/bin/bash
-#!/bin/bash -x
-# Author      : Antonio Jozzolino <antonio@jozzolino.com.br>
-# Site        : http://www.ozz.net.br
-# Created     : Wednesday July 26 2013 18:21:15 UTC -0300
-# Changed     : Wednesday December 10 2020 12:02:42 UTC -0300
-# Version     : 00.00.03
-# Description : 
-#               sudo apt-get install mariadb-server
-#               sudo mysqladmin -u root password "******";
-#               wget https://files.phpmyadmin.net/phpMyAdmin/5.1.3/phpMyAdmin-5.1.3-all-languages.zip
-#               sudo apt install -y apache2
-#               sudo apt install php libapache2-mod-php php-mysql
-
-#!/bin/bash
 
 # Import email and Telegram sending functions
+source /app/var.sh
 source /app/send_email.sh
 source /app/telegram.sh
 
-AUTHOR="Antonio Jozzolino"
-EMAIL="antonio@jozzolino.com.br"
+AUTHOR="Antonio J"
+EMAIL="info@sgd.com.br"
 PRN="$(basename $0)"
 VERSION="00.00.04"
 
@@ -29,6 +16,7 @@ else
     WHEN="$2"
 fi
 
+MYSQL_ROOT_PASSWORD=$COMICRACK_ROOT_PASSWORD
 host_name="%"
 db_server=$host_name
 backup_dir="/windows/backup/$WHEN"
@@ -108,6 +96,8 @@ function dbBackup( )
 {
     local ERROR=$ERROR
 
+    echo "Backup database $MYSQL_DATABASE"
+    echo "mysqldump -uroot -p$MYSQL_ROOT_PASSWORD $MYSQL_DATABASE --add-drop-table --quote-names --add-drop-database"
     mysqldump -uroot -p$MYSQL_ROOT_PASSWORD $MYSQL_DATABASE --add-drop-table --quote-names --add-drop-database > $sql_file || {
         ERROR="Error creating database dump:\n$(cat $sql_file)"
         return 1
