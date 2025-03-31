@@ -11,6 +11,7 @@ services:
       - "${BACKUP}:/windows/backup"
       - "${APPDATA}:/windows/appdata"
       - .\log:/var/log/
+      #- .\ssh_keys:/app/ssh_keys  # Diretório local com chaves públicas montado no container
     restart: always
     environment:
       PROJECT_PATH: ${PROJECT_PATH}
@@ -20,6 +21,7 @@ services:
       MYSQL_PASSWORD: ${COMICRACK_USER_PASSWORD}
     ports:
       - "3306:3306"
+      - "2222:2222"  # Mapeia a porta 22 local para a porta 2222 do container
     entrypoint: ["/bin/bash", "/app/docker-entrypoint.sh"]
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
