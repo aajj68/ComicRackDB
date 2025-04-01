@@ -22,6 +22,11 @@
 #
 # m h  dom mon dow   command
 
+# comicrack
 0 12 * * *  /bin/bash /app/comicrack.sh -c day 2>&1 | tee /var/log/comicrack.log
 0 13 * * 0  /bin/bash /app/comicrack.sh -c week 2>&1 | tee /var/log/comicrack.log
 0 14 1 * *  /bin/bash /app/comicrack.sh -c month 2>&1 | tee /var/log/comicrack.log
+# all databases
+0 15 * * *  /bin/bash /app/comicrack.sh -f day 2>&1 | tee /var/log/comicrack.log
+0 16 * * 0  /bin/bash /app/comicrack.sh -f week 2>&1 | tee /var/log/comicrack.log
+0 17 1 * *  /bin/bash /app/comicrack.sh -f month 2>&1 | tee /var/log/comicrack.log

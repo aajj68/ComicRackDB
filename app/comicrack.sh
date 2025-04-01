@@ -37,7 +37,7 @@ function usage( )
     echo
     echo "Try $PRN -h for more information."
     echo "$PRN $VERSION http://www.ozz.net.br"
-    echo "Copyright (C) 2012 - 2024 Ozz Sistemas Ltda"
+    echo "Copyright (C) 2012 - 2025 Ozz Sistemas Ltda"
     echo
     echo "This software compresses the entire directory tree into CBZ files."
     echo
@@ -50,6 +50,8 @@ function usage( )
     echo "-r Restore ComicRack database"  
     echo "-u Create ComicRack user and comicdb database"      
     echo "-h Show this help screen"      
+    echo "-f Backup all databases from server"
+    echo "-l Restore all databases to server"
     exit 0
 }
 
@@ -142,9 +144,74 @@ function appDataBackup( )
     fi
 }
 
+function dbBackupAll( )
+{
+    local ERROR=$ERROR
+    local all_sql="/tmp/all.sql"
+    local all_zip="$backup_dir/all.sql.zip"
+
+    echo "Backing up all databases"
+    mysqldump -uroot -p$MYSQL_ROOT_PASSWORD --all-databases --add-drop-table --quote-names --add-drop-database > $all_sql || {
+        ERROR="Error creating full database dump:\n$(cat $all_sql)"
+        return 1
+    }
+    
+    rm -fr $all_zip || {
+        ERROR="Error removing old all.sql ZIP file:\n$(cat $all_zip)"
+        return 1
+    }
+    
+    /usr/bin/zip -j -9 $all_zip $all_sql || {
+        ERROR="Error creating all.sql ZIP file:\n$(cat $all_zip)"
+        return 1
+    }
+    
+    rm $all_sql || {
+        ERROR="Error deleting all.sql file:\n$(cat $all_sql)"
+        return 1
+    }
+    
+    if [ ! -z "$ERROR" ]; then
+        send_email "[COMICRACK] Error in the ${FUNCNAME[0]} function" "$ERROR"
+    fi
+}
+
+function dbRestoreAll( )
+{
+    local ERROR=$ERROR
+    local all_zip="$backup_dir/all.sql.zip"
+    
+    echo "Extracting all.sql file from ZIP..."
+    /usr/bin/unzip $all_zip -d /tmp/ || {
+        ERROR="Error extracting all.sql file:\n$(cat $all_zip)"
+        return 1
+    }
+    
+    sed -i "s/utf8mb4_0900_ai_ci/utf8mb4_unicode_ci/g" /tmp/all.sql || {
+        ERROR="Error modifying all.sql file:\n$(cat /tmp/all.sql)"
+        return 1
+    }
+    
+    echo "Restoring all databases"
+    mysql -uroot -p$MYSQL_ROOT_PASSWORD < /tmp/all.sql || {
+        ERROR="Error restoring databases:\n$(cat /tmp/all.sql)"
+        return 1
+    }
+    
+    echo "Deleting all.sql"
+    rm /tmp/all.sql || {
+        ERROR="Error deleting all.sql file:\n$(cat /tmp/all.sql)"
+        return 1
+    }
+    
+    if [ ! -z "$ERROR" ]; then
+        send_email "[COMICRACK] Error in the ${FUNCNAME[0]} function" "$ERROR"
+    fi
+}
+
 # Execute options based on passed parameters
 
-while getopts "abcrhu" OPT; do
+while getopts "abcfhlru" OPT; do
     case "$OPT" in
     "a") appDataBackup
          exit 0
@@ -165,6 +232,12 @@ while getopts "abcrhu" OPT; do
     "h") usage
          exit 0
         ;;      
+    "f") dbBackupAll
+         exit 0
+        ;;
+    "l") dbRestoreAll
+         exit 0
+        ;;
     "?") usage
          exit 0
         ;;     
