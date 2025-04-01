@@ -6,3 +6,4 @@ log/*
 var.env
 *.code-workspace
 app/ssh_keys/*
+*.zip

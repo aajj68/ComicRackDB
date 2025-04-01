@@ -1,4 +1,5 @@
 #!/bin/bash
+# /bin/bash -x
 
 # Import email and Telegram sending functions
 source /app/var.sh
@@ -65,31 +66,44 @@ function dbCreate()
 
 function dbRestore( )
 {
-    local ERROR=$ERROR  
+    local ERROR=""
     echo "Extracting SQL file from ZIP..."
-    /usr/bin/unzip $zip_file -d /tmp/ || {
-        ERROR="Error extracting SQL file:\n$(cat $zip_file)"
+    /usr/bin/unzip "$zip_file" -d /tmp/ || {
+        ERROR="Error extracting SQL file: unzip failed for $zip_file"
         return 1
     }
     
-    sed -i "s/utf8mb4_0900_ai_ci/utf8mb4_unicode_ci/g" /tmp/$MYSQL_DATABASE.sql || {
-        ERROR="Error modifying SQL file:\n$(cat /tmp/$MYSQL_DATABASE.sql)"
+    # Remove o comentário problemático do MariaDB
+    sed -i 's|/\*M!999999\\- enable the sandbox mode \*/||g' /tmp/"$MYSQL_DATABASE".sql || {
+        ERROR="Error removing sandbox comment from SQL file:\n$(cat /tmp/$MYSQL_DATABASE.sql)"
+        return 1
+    }
+    
+    # Ajusta o collation para compatibilidade
+    sed -i "s/utf8mb4_0900_ai_ci/utf8mb4_unicode_ci/g" /tmp/"$MYSQL_DATABASE".sql || {
+        ERROR="Error modifying SQL file collation:\n$(cat /tmp/$MYSQL_DATABASE.sql)"
+        return 1
+    }
+    
+    # Substitui TYPE=InnoDB por ENGINE=InnoDB
+    sed -i "s/TYPE=InnoDB/ENGINE=InnoDB/g" /tmp/"$MYSQL_DATABASE".sql || {
+        ERROR="Error replacing TYPE with ENGINE in SQL file:\n$(cat /tmp/$MYSQL_DATABASE.sql)"
         return 1
     }
     
     echo "Restoring $MYSQL_DATABASE.sql"
-    mysql -uroot -p$MYSQL_ROOT_PASSWORD $MYSQL_DATABASE < /tmp/$MYSQL_DATABASE.sql || {
+    mysql -uroot -p"$MYSQL_ROOT_PASSWORD" "$MYSQL_DATABASE" < /tmp/"$MYSQL_DATABASE".sql || {
         ERROR="Error restoring database:\n$(cat /tmp/$MYSQL_DATABASE.sql)"
         return 1
     }
     
     echo "Deleting $MYSQL_DATABASE.sql"
-    rm /tmp/$MYSQL_DATABASE.sql || {
-        ERROR="Error deleting SQL file:\n$(cat /tmp/$MYSQL_DATABASE.sql)"
+    rm /tmp/"$MYSQL_DATABASE".sql || {
+        ERROR="Error deleting SQL file"
         return 1
     }
     
-    if [ ! -z "$ERROR" ]; then
+    if [ -n "$ERROR" ]; then
         send_email "[COMICRACK] Error in the ${FUNCNAME[0]} function" "$ERROR"
     fi
 }
@@ -99,8 +113,8 @@ function dbBackup( )
     local ERROR=$ERROR
 
     echo "Backup database $MYSQL_DATABASE"
-    echo "mysqldump -uroot -p$MYSQL_ROOT_PASSWORD $MYSQL_DATABASE --add-drop-table --quote-names --add-drop-database"
-    mysqldump -uroot -p$MYSQL_ROOT_PASSWORD $MYSQL_DATABASE --add-drop-table --quote-names --add-drop-database > $sql_file || {
+    echo "mysqldump -uroot -p$MYSQL_ROOT_PASSWORD $MYSQL_DATABASE --add-drop-table --quote-names --add-drop-database --compatible=mysql40"
+    mysqldump -uroot -p$MYSQL_ROOT_PASSWORD $MYSQL_DATABASE --add-drop-table --quote-names --add-drop-database --compatible=mysql40 > $sql_file || {
         ERROR="Error creating database dump:\n$(cat $sql_file)"
         return 1
     }
@@ -151,7 +165,7 @@ function dbBackupAll( )
     local all_zip="$backup_dir/all.sql.zip"
 
     echo "Backing up all databases"
-    mysqldump -uroot -p$MYSQL_ROOT_PASSWORD --all-databases --add-drop-table --quote-names --add-drop-database > $all_sql || {
+    mysqldump -uroot -p$MYSQL_ROOT_PASSWORD --all-databases --add-drop-table --quote-names --add-drop-database --compatible=mysql40 > $all_sql || {
         ERROR="Error creating full database dump:\n$(cat $all_sql)"
         return 1
     }
@@ -162,7 +176,7 @@ function dbBackupAll( )
     }
     
     /usr/bin/zip -j -9 $all_zip $all_sql || {
-        ERROR="Error creating all.sql ZIP file:\n$(cat $all_zip)"
+        ERROR="Error creating all.sql ZIP file:\n$(echo $all_zip)"
         return 1
     }
     
@@ -178,12 +192,12 @@ function dbBackupAll( )
 
 function dbRestoreAll( )
 {
-    local ERROR=$ERROR
-    local all_zip="$backup_dir/all.sql.zip"
+    local ERROR=""
+    local all_zip="${backup_dir}/all.sql.zip"
     
     echo "Extracting all.sql file from ZIP..."
-    /usr/bin/unzip $all_zip -d /tmp/ || {
-        ERROR="Error extracting all.sql file:\n$(cat $all_zip)"
+    /usr/bin/unzip "$all_zip" -d /tmp/ || {
+        ERROR="Error extracting all.sql file: unzip failed for $all_zip"
         return 1
     }
     
@@ -193,18 +207,18 @@ function dbRestoreAll( )
     }
     
     echo "Restoring all databases"
-    mysql -uroot -p$MYSQL_ROOT_PASSWORD < /tmp/all.sql || {
+    mysql -uroot -p"$MYSQL_ROOT_PASSWORD" < /tmp/all.sql || {
         ERROR="Error restoring databases:\n$(cat /tmp/all.sql)"
         return 1
     }
     
     echo "Deleting all.sql"
     rm /tmp/all.sql || {
-        ERROR="Error deleting all.sql file:\n$(cat /tmp/all.sql)"
+        ERROR="Error deleting all.sql file"
         return 1
     }
     
-    if [ ! -z "$ERROR" ]; then
+    if [ -n "$ERROR" ]; then
         send_email "[COMICRACK] Error in the ${FUNCNAME[0]} function" "$ERROR"
     fi
 }
