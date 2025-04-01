@@ -7,6 +7,7 @@ apt-get install zip -y
 apt-get install unzip -y
 apt-get install ssmtp -y
 apt-get install curl -y
+apt-get install nano -y
 apt-get install openssh-server -y  # Adiciona o servidor SSH
 
 # Install cron
