@@ -20,7 +20,7 @@ services:
       MYSQL_PASSWORD: ${COMICRACK_USER_PASSWORD}
     ports:
       - "3306:3306"
-      - "2222:2222"  # Mapeia a porta 22 local para a porta 2222 do container
+      - "2222:22"  # Mapeia a porta 2222 local para a porta 22 do container
     entrypoint: ["/bin/bash", "/app/docker-entrypoint.sh"]
   phpmyadmin:
     image: phpmyadmin/phpmyadmin

@@ -8,6 +8,7 @@ apt-get install unzip -y
 apt-get install ssmtp -y
 apt-get install curl -y
 apt-get install nano -y
+apt-get install mytop -y
 apt-get install openssh-server -y  # Adiciona o servidor SSH
 
 # Install cron
@@ -30,7 +31,7 @@ chmod 700 /root/.ssh
 chmod 600 /root/.ssh/authorized_keys
 
 # Configure SSH to use port 2222
-sed -i 's/#Port 22/Port 2222/' /etc/ssh/sshd_config
+# sed -i 's/#Port 22/Port 2222/' /etc/ssh/sshd_config
 echo "PermitRootLogin yes" >> /etc/ssh/sshd_config  # Permite login como root (ajuste conforme necessário)
 
 # Start services
