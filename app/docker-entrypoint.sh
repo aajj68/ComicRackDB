@@ -41,4 +41,4 @@ echo "PermitRootLogin yes" >> /etc/ssh/sshd_config  # Permite login como root (a
 service cron start
 service ssh start  # Inicia o servidor SSH
 
-exec docker-entrypoint.sh mysqld
+exec /usr/local/bin/docker-entrypoint.sh mysqld
