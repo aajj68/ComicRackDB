@@ -3,7 +3,7 @@
 function send_email() {
     local subject="$1"
     local log_file="/var/log/comicrack.log"
-    local to="${SMMTP_TO:-info@sgd.com.br}"  # Use the environment variable or the default value
+    local to="${SMMTP_TO:-antonio.jozzolino@gmail.com}"  # Use the environment variable or the default value
     local body=""
 
     # Read the content of the log file

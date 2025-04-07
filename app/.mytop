@@ -1,0 +1,6 @@
+user=comicrack
+pass=comicrack  
+host=localhost  
+db=comicdb
+delay=5  
+port=3306
